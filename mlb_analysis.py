@@ -370,7 +370,8 @@ with current_szn:
 
 
     streamlit.header("Roster Analyzer")
-    streamlit.text("Coming soon!")
+    streamlit.text("Here are the 2022 Yankees hitters. Complete roster tool coming soon.")
+    streamlit.write(Yanks)
 
 
 
