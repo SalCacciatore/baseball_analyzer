@@ -370,7 +370,10 @@ with current_szn:
 
 
     streamlit.header("Roster Analyzer")
-    streamlit.text("Here are the 2022 Yankees hitters. Complete roster tool coming soon.")
+    if streamlit.button("Let's see this Yanks!"):
+        streamlit.text("Here are the 2022 Yankees hitters. Complete roster tool coming soon.")
+    else:
+        streamlit.text("Coming soon.")
     streamlit.write(Yanks)
 
 
