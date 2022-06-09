@@ -336,25 +336,36 @@ with current_szn:
         with streamlit.form("past_selection"):
             what_past = sel_col.text_input('What player do you want to learn about?',"Bernie Williams")
             what_szn = sel_col.text_input("What season?",1998)
-
             #what_szn = sel_col.slider("What season?",min_value=1871,max_value=2022,value=1998)
             submitted = streamlit.form_submit_button("Submit")
             if submitted:
-                streamlit.write("Player: " + str(what_past) + ", " + str(what_szn))
-                player_szn_finder(what_past,what_szn)
+                if what_szn.isnumeric() == False:
+                    streamlit.write('Please insert an integer next time.')
+                elif int(what_szn) not in range (1871,2023):
+                    streamlit.write('Invalid year. Please select a year between 1871 and 2022.')
+                else:
+                    streamlit.write("Player: " + str(what_past) + ", " + str(what_szn))
+                    player_szn_finder(what_past,what_szn)
 
 
     if player_prompt == "Compare":
         with streamlit.form('comparison'):
 
             player1 = sel_col.text_input('Who is the first player you want to learn about?',"Mike Trout")
-            szn1 = sel_col.slider("What season?",min_value=1871,max_value=2022,value=2013)
+            szn1 = sel_col.text_input("What season?",2013)
+
             player2 = sel_col.text_input('Who is the second player you want to learn about?',"Aaron Judge")
-            szn2 = sel_col.slider("What season?",min_value=1871,max_value=2022,value=2017)
+            szn2 = sel_col.text_input("What season?",2017)
+
             submitted = streamlit.form_submit_button("Submit")
             if submitted:
-                streamlit.write("Player 1: " + player1 + " ("+str(szn1)+")"+" | Player 2:",player2 +" ("+str(szn2)+")")
-                compare_seasons(player1,player2,szn1,szn2)
+                if szn1.isnumeric() == False or szn2.isnumeric() == False:
+                    streamlit.write('Please insert an integer next time.')
+                elif int(szn1) not in range (1871,2023) or int(szn2) not in range (1871,2023):
+                    streamlit.write('Invalid year. Please select a year between 1871 and 2022.')
+                else:
+                    streamlit.write("Player 1: " + player1 + " ("+str(szn1)+")"+" | Player 2:",player2 +" ("+str(szn2)+")")
+                    compare_seasons(player1,player2,szn1,szn2)
 
 
 
@@ -375,10 +386,12 @@ with current_szn:
     if hit_or_throw == 'Hitters':
         yr = batting_stats(what_year)
         disp_df = yr[['Name','Team','PA','wRC+','OBP','SLG','HR','ISO','WAR']].head(10)
+        streamlit.write("Hitters,",str(what_year))
         streamlit.write(disp_df)
     if hit_or_throw == 'Pitchers':
         yr = pitching_stats(what_year)
         disp_df = yr[['Name','Team','ERA','FIP','xFIP','ERA-','FIP-','xFIP-','K%','BB%','WAR']].head(10)
+        streamlit.write("Pitchers,",str(what_year))
         streamlit.write(disp_df)
 
 
