@@ -341,7 +341,8 @@ with current_szn:
         szn1 = sel_col.slider("What season?",min_value=1871,max_value=2022,value=2013)
         player2 = sel_col.text_input('Who is the second player you want to learn about?',"Aaron Judge")
         szn2 = sel_col.slider("What season?",min_value=1871,max_value=2022,value=2017)
-        compare_seasons(player1,player2,szn1,szn2)
+        if streamlit.button("Compare players."):
+            compare_seasons(player1,player2,szn1,szn2)
 
 
 
@@ -370,7 +371,7 @@ with current_szn:
 
 
     streamlit.header("Roster Analyzer")
-    if streamlit.button("Let's see this Yanks!"):
+    if streamlit.button("Let's see those Yanks!"):
         streamlit.text("Here are the 2022 Yankees hitters. Complete roster tool coming soon.")
         streamlit.write(Yanks)
 
