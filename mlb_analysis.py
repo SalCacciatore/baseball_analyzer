@@ -368,7 +368,7 @@ def pitcher_query(answer):
     streamlit.write("{} has not piched this season.".format(answer))
 
 def pitcher_spider(answer):
-  categories = all_pitchers[['BB%+','Barrel%+','HH%+','EV+','HR/FB%+','BABIP+','GB%+','Z-Swing%+','O-Swing%+','Z-Contact%+','O-Contact%+','SwStr%+','K%+','LOB%+']].columns
+  categories = all_pitchers[['LOB%+','BABIP+','HR/FB%+','EV+','HH%+','Barrel%+','GB%+','Z-Swing%+','O-Swing%+','Z-Contact%+','O-Contact%+','SwStr%+','K%+','BB%+']].columns
 
   avg_list = []
   for cat in categories:
