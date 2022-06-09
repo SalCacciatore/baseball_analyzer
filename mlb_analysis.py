@@ -291,6 +291,7 @@ def compare_seasons(player1,player2,year1,year2):
               streamlit.plotly_chart(fig, use_container_width=True)
 
 
+
 def prompt():
   answer=input("Get a player's CURRENT season stats, PAST season stats or COMPARE two seasons?" ).upper()
   if answer == 'CURRENT':
@@ -318,8 +319,94 @@ def prompt():
     print('Invalid entry. Insert CANCEL to exit.')
     prompt()
 
+
+all_pitchers = pitching_stats(2022,qual=1)
+qual_pitch = pitching_stats(2022)
+
+p_chase_median = qual_pitch['O-Swing%'].median()
+
+p_z_contact_median = qual_pitch['Z-Contact%'].median()
+
+p_z_swing_median = qual_pitch['Z-Swing%'].median()
+
+p_o_contact_median = qual_pitch['O-Contact%'].median()
+
+p_swstr_median = qual_pitch['SwStr%'].median()
+
+p_barrel_median = qual_pitch['Barrel%'].median()
+
+p_EV_median = qual_pitch['EV'].median()
+
+p_hard_hit_median = qual_pitch['HardHit%'].median()
+
+
+
+
+all_pitchers['O-Swing%+'] = round(all_pitchers['O-Swing%']/p_chase_median,2)*100
+all_pitchers['O-Contact%+'] = (1 - round(all_pitchers['O-Contact%']/p_o_contact_median,2))*100 + 100
+all_pitchers['Z-Contact%+'] = (1 - round(all_pitchers['Z-Contact%']/p_z_contact_median,2))*100 + 100
+all_pitchers['Z-Swing%+'] = (1 - round(all_pitchers['Z-Swing%']/p_z_swing_median,2))*100 + 100
+all_pitchers['SwStr%+'] = round(all_pitchers['SwStr%']/p_swstr_median,2)*100
+
+all_pitchers['HH%+'] = (1 - round(all_pitchers['HardHit%']/p_hard_hit_median,2))*100 +100
+all_pitchers['EV+'] = (1 - round(all_pitchers['EV']/p_EV_median,2))*100+100
+all_pitchers['Barrel%+'] = (1-round(all_pitchers['Barrel%']/p_barrel_median,2))*100+100
+
+all_pitchers['ERA+'] = 100 - all_pitchers['ERA-'] + 100
+all_pitchers['FIP+'] = 100 - all_pitchers['FIP-'] + 100
+all_pitchers['xFIP+'] = 100 - all_pitchers['xFIP-'] + 100
+all_pitchers['BB%+'] = 100 - all_pitchers['BB%+'] + 100
+all_pitchers['BABIP+'] = 100 - all_pitchers['BABIP+'] + 100
+all_pitchers['HR/FB%+'] = 100 - all_pitchers['HR/FB%+'] + 100
+
+def pitcher_query(answer):
+  if answer in all_pitchers['Name'].values:
+    displ_df = all_pitchers[all_pitchers['Name']==answer][['Name','Team','G','GS','IP','WAR','ERA+','FIP+','xFIP+','K%+','BB%+','GB%+','BABIP+','HR/FB%+','LOB%+','O-Swing%+','O-Contact%+','Z-Contact%+','Z-Swing%+','SwStr%+','HH%+','EV+','Barrel%+']].set_index('Name')
+    streamlit.write(displ_df)
+    pitcher_spider(answer)
+  else:
+    streamlit.write("{} has not piched this season.".format(answer))
+
+def pitcher_spider(answer):
+  categories = all_pitchers[['BB%+','Barrel%+','HH%+','EV+','HR/FB%+','BABIP+','GB%+','Z-Swing%+','O-Swing%+','Z-Contact%+','O-Contact%+','SwStr%+','K%+','LOB%+']].columns
+
+  avg_list = []
+  for cat in categories:
+    avg_list.append(100)
+
+  avg_list.append(100)
+
+  player_chart=all_pitchers.loc[all_pitchers['Name']==answer]
+
+  stats = []
+
+  for x in categories:
+    stats.append(player_chart[x].item())
+
+  fig = go.Figure()
+
+  fig.add_trace(go.Scatterpolar(
+      r=stats,
+      theta=categories,
+      fill='toself',
+      name=answer))
+  fig.add_trace(go.Scatterpolar(
+      r=avg_list,
+      theta=categories,
+      #fill='toself',
+      name='MLB Average'))
+
+  fig.update_layout(title=answer)
+
+  streamlit.plotly_chart(fig, use_container_width=True)
+
+  #fig.show()
+
+
+
 header = streamlit.container()
 current_szn = streamlit.container()
+pitcher_szn = streamlit.container()
 
 
 with header:
@@ -346,14 +433,13 @@ with current_szn:
 
 
 
-                #streamlit.write('You chose a random player. Stay tuned for this feature.')
 
 
 
 
     if player_prompt == "Past":
         with streamlit.form("past_selection"):
-            what_past = sel_col.text_input('What player do you want to learn about?',"Bernie Williams")
+            what_past = sel_col.text_input('What batter do you want to learn about?',"Bernie Williams")
             what_szn = sel_col.text_input("What season?",1998)
             #what_szn = sel_col.slider("What season?",min_value=1871,max_value=2022,value=1998)
             submitted = streamlit.form_submit_button("Submit")
@@ -386,13 +472,31 @@ with current_szn:
                     streamlit.write("Player 1: " + player1 + " ("+str(szn1)+")"+" | Player 2:",player2 +" ("+str(szn2)+")")
                     compare_seasons(player1,player2,szn1,szn2)
 
-
-
-
-
-
+with current_szn:
     streamlit.header("Pitcher Season Analyzer")
-    streamlit.text("Coming soon!")
+    sel_col, disp_col = streamlit.columns(2)
+    pitcher_prompt = sel_col.selectbox("Look at a pitcher's stats from this season or past seasons, or compare two individual seasons.",options=["Current","Past","Compare"],index=0)
+    if pitcher_prompt == "Compare":
+        streamlit.write('Feature coming soon.')
+    if pitcher_prompt == "Past":
+                streamlit.write('Feature coming soon.')
+    if pitcher_prompt == "Current":
+        with streamlit.form("pitcher_selection"):
+            what_pitcher = sel_col.text_input('What pitcher do you want to learn about?',"Nestor Cortes")
+            pi_submitted = streamlit.form_submit_button("Submit")
+            if pi_submitted:
+                pitcher_query(what_pitcher)
+        with streamlit.form("random_pitcher"):
+            rp_submit = streamlit.form_submit_button("Random Pitcher")
+            if rp_submit:
+                random_pitcher = random.choices(all_pitchers['Name'], k=1)[0]
+                pitcher_query(random_pitcher)
+
+
+
+
+
+
 
 
 
