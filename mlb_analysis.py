@@ -338,7 +338,7 @@ with current_szn:
             what_szn = sel_col.slider("What season?",min_value=1871,max_value=2022,value=1998)
             submitted = streamlit.form_submit_button("Submit")
             if submitted:
-                streamlit.write("Player:", what_past, "Year:", str(what_szn))
+                streamlit.write("Player:" + "," + str(what_szn))
                 player_szn_finder(what_past,what_szn)
 
 
