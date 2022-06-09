@@ -335,7 +335,9 @@ with current_szn:
     if player_prompt == "Past":
         with streamlit.form("past_selection"):
             what_past = sel_col.text_input('What player do you want to learn about?',"Bernie Williams")
-            what_szn = sel_col.slider("What season?",min_value=1871,max_value=2022,value=1998)
+            what_szn = sel_col.text_input("What season?",1998)
+
+            #what_szn = sel_col.slider("What season?",min_value=1871,max_value=2022,value=1998)
             submitted = streamlit.form_submit_button("Submit")
             if submitted:
                 streamlit.write("Player: " + str(what_past) + ", " + str(what_szn))
