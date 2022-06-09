@@ -333,16 +333,29 @@ with current_szn:
       what_player = sel_col.text_input('What player do you want to learn about?',"Giancarlo Stanton")
       baseball_query(what_player)
     if player_prompt == "Past":
-      what_past = sel_col.text_input('What player do you want to learn about?',"Bernie Williams")
-      what_szn = sel_col.slider("What season?",min_value=1871,max_value=2022,value=1998)
-      player_szn_finder(what_past,what_szn)
+        with streamlit.form("past_selection"):
+            what_past = sel_col.text_input('What player do you want to learn about?',"Bernie Williams")
+            what_szn = sel_col.slider("What season?",min_value=1871,max_value=2022,value=1998)
+            submitted = streamlit.form_submit_button("Submit")
+            if submitted:
+                streamlit.write("Player:", what_past, "Year:", str(what_szn))
+                player_szn_finder(what_past,what_szn)
+
+
     if player_prompt == "Compare":
-        player1 = sel_col.text_input('Who is the first player you want to learn about?',"Mike Trout")
-        szn1 = sel_col.slider("What season?",min_value=1871,max_value=2022,value=2013)
-        player2 = sel_col.text_input('Who is the second player you want to learn about?',"Aaron Judge")
-        szn2 = sel_col.slider("What season?",min_value=1871,max_value=2022,value=2017)
-        if streamlit.button("Compare players."):
-            compare_seasons(player1,player2,szn1,szn2)
+        with streamlit.form('comparison'):
+
+            player1 = sel_col.text_input('Who is the first player you want to learn about?',"Mike Trout")
+            szn1 = sel_col.slider("What season?",min_value=1871,max_value=2022,value=2013)
+            player2 = sel_col.text_input('Who is the second player you want to learn about?',"Aaron Judge")
+            szn2 = sel_col.slider("What season?",min_value=1871,max_value=2022,value=2017)
+            submitted = streamlit.form_submit_button("Submit")
+            if submitted:
+                streamlit.write("Player 1: " + player1 + " ("+str(szn1)+")"+" | Player 2:",player2 +" ("+str(szn2)+")")
+                compare_seasons(player1,player2,szn1,szn2)
+
+
+
 
 
 
