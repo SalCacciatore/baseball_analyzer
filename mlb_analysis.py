@@ -6,6 +6,7 @@ import pandas as pd
 
 import streamlit
 
+import random
 
 from pybaseball import batting_stats
 from pybaseball import pitching_stats
@@ -158,7 +159,7 @@ def create_scatter_past(df,player,year):
 
 def baseball_query(answer):
   if answer in all_batters['Name'].values:
-    df_show = all_batters[all_batters['Name']==answer][['Name','PA',	'OBP', 'SLG',	'wRC+',	'WAR',	'K%+',	'BB%+',	'ISO+',	'BABIP+',	'GB%+',	'LD%+',	'FB%+', 'Barrel%+']].set_index('Name')
+    df_show = all_batters[all_batters['Name']==answer][['Name','Team','PA',	'OBP', 'SLG',	'wRC+',	'WAR',	'K%+',	'BB%+',	'ISO+',	'BABIP+',	'GB%+',	'LD%+',	'FB%+', 'Barrel%+']].set_index('Name')
     streamlit.write(df_show)
     create_scatter(answer)
   else:
@@ -329,9 +330,27 @@ with current_szn:
     streamlit.header("Batter Season Analyzer")
     sel_col, disp_col = streamlit.columns(2)
     player_prompt = sel_col.selectbox("Look at a batter's stats from this season or past seasons, or compare two individual seasons.",options=["Current","Past","Compare"],index=0)
+
     if player_prompt == "Current":
-      what_player = sel_col.text_input('What player do you want to learn about?',"Giancarlo Stanton")
-      baseball_query(what_player)
+        with streamlit.form("current_selection"):
+            what_player = sel_col.text_input('What player do you want to learn about?',"Giancarlo Stanton")
+            p_submitted = streamlit.form_submit_button("Submit")
+            if p_submitted:
+                baseball_query(what_player)
+        with streamlit.form("random"):
+            r_submit = streamlit.form_submit_button("Random Player")
+            if r_submit:
+                random_player = random.choices(all_batters['Name'], k=1)[0]
+                baseball_query(random_player)
+
+
+
+
+                #streamlit.write('You chose a random player. Stay tuned for this feature.')
+
+
+
+
     if player_prompt == "Past":
         with streamlit.form("past_selection"):
             what_past = sel_col.text_input('What player do you want to learn about?',"Bernie Williams")
