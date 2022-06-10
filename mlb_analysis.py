@@ -79,6 +79,9 @@ all_batters['K%+'] = 100+(100 - all_batters['K%+'])
 all_batters['O-Swing%+'] = 100+ (100 - all_batters['O-Swing%+'])
 all_batters['SwStr%+'] = 100+ (100 - all_batters['SwStr%+'])
 
+all_batters['WAR/600'] = round(all_batters['WAR']/all_batters['PA']*600,1)
+
+
 Yanks = all_batters[all_batters['Team']=='NYY'].sort_values('WAR',ascending=False).drop(['Team','Pull%+','EV'],axis=1).set_index('Name')
 
 #Yanks
@@ -88,6 +91,20 @@ Yanks = all_batters[all_batters['Team']=='NYY'].sort_values('WAR',ascending=Fals
 #today_lineup['Name'] =lineup_list
 
 #today_lineup.merge(all_batters,on='Name').drop(['Team','Pull%+','O-Contact%+','EV'],axis=1).set_index('Name')
+
+
+hitter_proj = pd.read_csv('Steamer_hitters.csv')
+
+hitter_proj['K%'] = hitter_proj['SO']/hitter_proj['PA']
+hitter_proj['BB%'] = hitter_proj['BB']/hitter_proj['PA']
+hitter_proj['ISO'] = hitter_proj['SLG'] - hitter_proj['AVG']
+hitter_proj['BABIP'] = (hitter_proj['H'] - hitter_proj['HR'])/(hitter_proj['AB']-hitter_proj['SO']-hitter_proj['HR'])
+hitter_proj['WAR/600'] = round(hitter_proj['WAR']/hitter_proj['PA']*600,1)
+
+hitter_proj = hitter_proj[['Name','Team','PA','OBP','SLG','wRC+','WAR','WAR/600','K%','BB%','ISO','BABIP']]
+
+
+
 
 def create_scatter(answer):
   categories = all_batters[['BB%+','K%+','SwStr%+','Z-Contact%+','O-Contact%+','O-Swing%+','Z-Swing%+','EV+','HH%+','Barrel%+','LD%+','FB%+','ISO+','BABIP+']].columns
@@ -159,8 +176,12 @@ def create_scatter_past(df,player,year):
 
 def baseball_query(answer):
   if answer in all_batters['Name'].values:
-    df_show = all_batters[all_batters['Name']==answer][['Name','Team','PA',	'OBP', 'SLG',	'wRC+',	'WAR',	'K%+',	'BB%+',	'ISO+',	'BABIP+',	'GB%+',	'LD%+',	'FB%+', 'Barrel%+']].set_index('Name')
+    df_show = all_batters[all_batters['Name']==answer][['Name','Team','PA',	'OBP', 'SLG',	'wRC+',	'WAR','WAR/600','K%+',	'BB%+',	'ISO+',	'BABIP+',	'GB%+',	'LD%+',	'FB%+', 'Barrel%+']].set_index('Name')
+    #df_show.rename(index={answer: 'Year-to-date'},inplace=True)
     streamlit.write(df_show)
+    proj_show = hitter_proj[hitter_proj['Name']==answer].set_index('Name')
+    proj_show.rename(index={answer: 'Steamer (ROS)'},inplace=True)
+    streamlit.write(proj_show)
     create_scatter(answer)
   else:
     streamlit.text("{} has no plate appearances this season.".format(answer))
@@ -199,7 +220,7 @@ def season_definer(year):
   all_batters['K%+'] = 100+(100 - all_batters['K%+'])
   all_batters['O-Swing%+'] = 100+ (100 - all_batters['O-Swing%+'])
   all_batters['SwStr%+'] = 100+ (100 - all_batters['SwStr%+'])
-
+  all_batters['WAR/600'] = round(all_batters['WAR']/all_batters['PA']*600,1)
   return all_batters
 
 def player_szn_finder(player,year):
@@ -209,7 +230,7 @@ def player_szn_finder(player,year):
   else:
     all_batters['Season'] = year
     df = all_batters[all_batters['Name']==player].set_index('Name')
-    display_df = df[['Season','Team','PA',	'OBP', 'SLG',	'wRC+',	'WAR',	'K%+',	'BB%+',	'ISO+',	'BABIP+',	'GB%+',	'LD%+',	'FB%+', 'Barrel%+']]
+    display_df = df[['Season','Team','PA',	'OBP', 'SLG',	'wRC+',	'WAR', 'WAR/600', 'K%+',	'BB%+',	'ISO+',	'BABIP+',	'GB%+',	'LD%+',	'FB%+', 'Barrel%+']]
     streamlit.write(display_df)
     create_scatter_past(df,player,year)
 
@@ -358,6 +379,7 @@ all_pitchers['xFIP+'] = 100 - all_pitchers['xFIP-'] + 100
 all_pitchers['BB%+'] = 100 - all_pitchers['BB%+'] + 100
 all_pitchers['BABIP+'] = 100 - all_pitchers['BABIP+'] + 100
 all_pitchers['HR/FB%+'] = 100 - all_pitchers['HR/FB%+'] + 100
+
 
 def pitcher_query(answer):
   if answer in all_pitchers['Name'].values:
@@ -521,14 +543,25 @@ with current_szn:
 
 team_list = all_batters['Team'].unique()
 
+all_pitchers_show = all_pitchers[['Name','Team','G','GS','IP','WAR','ERA+','FIP+','xFIP+','K%+','BB%+','GB%+','BABIP+','HR/FB%+','LOB%+','O-Swing%+','O-Contact%+','Z-Contact%+','Z-Swing%+','SwStr%+','HH%+','EV+','Barrel%+']]
+
+
+
+
 with roster_szn:
     streamlit.header("Roster Analyzer")
     with streamlit.form("roster_picker"):
         what_roster = streamlit.selectbox("What roster do you want to look at?",options=team_list,index=0)
         team_submit = streamlit.form_submit_button("Submit")
         if team_submit:
-            df_team = all_batters[all_batters['Team']==what_roster].sort_values('WAR',ascending=False).set_index('Name')
-            streamlit.write(df_team)
+            df_hitters = all_batters[all_batters['Team']==what_roster].sort_values('WAR',ascending=False).set_index('Name')
+            df_pitchers = all_pitchers_show[all_pitchers_show['Team']==what_roster].sort_values('WAR',ascending=False).set_index('Name')
+            streamlit.write('Hitters:')
+            streamlit.write(df_hitters)
+            streamlit.write("Pitchers")
+            streamlit.write(df_pitchers)
+
+
 
 
 
