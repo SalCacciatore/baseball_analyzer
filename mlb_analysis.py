@@ -178,9 +178,11 @@ def baseball_query(answer):
   if answer in all_batters['Name'].values:
     df_show = all_batters[all_batters['Name']==answer][['Name','Team','PA',	'OBP', 'SLG',	'wRC+',	'WAR','WAR/600','K%+',	'BB%+',	'ISO+',	'BABIP+',	'GB%+',	'LD%+',	'FB%+', 'Barrel%+']].set_index('Name')
     #df_show.rename(index={answer: 'Year-to-date'},inplace=True)
+    streamlit.write("Year-to-date stats")
     streamlit.write(df_show)
     proj_show = hitter_proj[hitter_proj['Name']==answer].set_index('Name')
-    proj_show.rename(index={answer: 'Steamer (ROS)'},inplace=True)
+    proj_show.rename(index={answer: 'Steamer'},inplace=True)
+    streamlit.write("Rest-of-season projections")
     streamlit.write(proj_show)
     create_scatter(answer)
   else:
