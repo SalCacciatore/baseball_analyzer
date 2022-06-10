@@ -407,6 +407,7 @@ def pitcher_spider(answer):
 header = streamlit.container()
 current_szn = streamlit.container()
 pitcher_szn = streamlit.container()
+roster_szn = streamlit.container()
 
 
 with header:
@@ -518,16 +519,18 @@ with current_szn:
         streamlit.write(disp_df)
 
 
+team_list = all_batters['Team'].unique()
 
-
-
+with roster_szn:
     streamlit.header("Roster Analyzer")
-    if streamlit.button("Let's see those Yanks!"):
-        streamlit.text("Here are the 2022 Yankees hitters. Complete roster tool coming soon.")
-        streamlit.write(Yanks)
+    with streamlit.form("roster_picker"):
+        what_roster = streamlit.selectbox("What roster do you want to look at?",options=team_list,index=0)
+        team_submit = streamlit.form_submit_button("Submit")
+        if team_submit:
+            df_team = all_batters[all_batters['Team']==what_roster].sort_values('WAR',ascending=False).set_index('Name')
+            streamlit.write(df_team)
 
-    else:
-        streamlit.text("Coming soon.")
+
 
 
 
