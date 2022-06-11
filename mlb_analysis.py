@@ -8,9 +8,7 @@ import streamlit
 
 import random
 
-from pybaseball import batting_stats
-from pybaseball import pitching_stats
-
+from pybaseball import batting_stats,pitching_stats,team_batting,team_pitching
 
 import numpy as np
 
@@ -383,6 +381,37 @@ all_pitchers['BABIP+'] = 100 - all_pitchers['BABIP+'] + 100
 all_pitchers['HR/FB%+'] = 100 - all_pitchers['HR/FB%+'] + 100
 
 
+
+#Team Ranks
+
+def team_stats(year,team):
+    df = team_batting(year)[['Team','WAR','wRC+','R','OBP','SLG','ISO','K%','BB%','BABIP','FB%','LD%','Barrel%','EV','HardHit%','Def']]
+    df['K%'] = df['K%'] * -1
+    for x in df.columns[1:]:
+        df[x] = df[x].rank(ascending=0)
+        df[x] = df[x].astype(int)
+    df = df[df['Team']==team]
+    df['Team'] = 'Hitters'
+    df.set_index('Team',inplace=True)
+    return df
+
+def squad_pitching(year,team):
+    low_is_good = ['ERA-','FIP-','xFIP-','BB%','HR%','HR/FB','BABIP','Barrel%']
+    df = team_pitching(year)
+    df['HR%'] = df['HR']/df['TBF']
+    df = df[['Team','WAR','Starting','Relieving','Start-IP','ERA-','FIP-','xFIP-','K-BB%','K%','BB%','GB%','HR%','HR/FB','LOB%','BABIP','Barrel%']]
+    for stat in low_is_good:
+        df[stat] = df[stat]*-1
+    for x in df.columns[1:]:
+        df[x] = df[x].rank(ascending=0)
+        df[x] = df[x].astype(int)
+    df = df[df['Team']==team]
+    df['Team'] = 'Pitchers'
+    df.set_index('Team',inplace=True)
+    return df
+
+
+
 def pitcher_query(answer):
   if answer in all_pitchers['Name'].values:
     displ_df = all_pitchers[all_pitchers['Name']==answer][['Name','Team','G','GS','IP','WAR','ERA+','FIP+','xFIP+','K%+','BB%+','GB%+','BABIP+','HR/FB%+','LOB%+','O-Swing%+','O-Contact%+','Z-Contact%+','Z-Swing%+','SwStr%+','HH%+','EV+','Barrel%+']].set_index('Name')
@@ -556,6 +585,8 @@ with roster_szn:
         what_roster = streamlit.selectbox("What roster do you want to look at?",options=team_list,index=0)
         team_submit = streamlit.form_submit_button("Submit")
         if team_submit:
+            streamlit.write(team_stats(2022,what_roster))
+            streamlit.write(squad_pitching(2022,what_roster))
             df_hitters = all_batters[all_batters['Team']==what_roster].sort_values('WAR',ascending=False).set_index('Name')
             df_pitchers = all_pitchers_show[all_pitchers_show['Team']==what_roster].sort_values('WAR',ascending=False).set_index('Name')
             streamlit.write('Hitters:')
