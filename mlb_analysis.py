@@ -18,7 +18,7 @@ from IPython.display import display
 
 ind_bat = batting_stats(2022)
 
-qual_batters = ind_bat[['Name','Team','PA','AVG','OBP','SLG','HR','wRC+','O-Swing%','Z-Contact%','Z-Swing%','O-Contact%','SwStr%','Barrel%','EV','HardHit%','LD%']]
+qual_batters = ind_bat[['Name','Team','PA','K%','BB%','ISO','BABIP','AVG','OBP','SLG','HR','wRC+','O-Swing%','Z-Contact%','Z-Swing%','O-Contact%','SwStr%','Barrel%','EV','HardHit%','LD%']]
 
 perc_rank = ind_bat.rank(pct=True)
 perc_stats = perc_rank.sort_values('HardHit%',ascending=False)[['AVG','OBP','SLG','wRC+','K%','BB%','Barrel%','HardHit%','EV','SwStr%','O-Swing%','Z-Contact%','FB%','GB%','LD%']]
@@ -34,7 +34,17 @@ perc_stats.set_axis(col_list, axis=1,inplace=True)
 
 #perc_stats
 
+
 qualified_batters = qual_batters.merge(perc_stats,right_index=True,left_index=True)
+
+
+k_median = qual_batters['K%'].median()
+
+bb_median = qual_batters['BB%'].median()
+
+iso_median = qual_batters['ISO'].median()
+
+babip_median = qual_batters['BABIP'].median()
 
 chase_median = qual_batters['O-Swing%'].median()
 
@@ -98,9 +108,18 @@ hitter_proj['BB%'] = hitter_proj['BB']/hitter_proj['PA']
 hitter_proj['ISO'] = hitter_proj['SLG'] - hitter_proj['AVG']
 hitter_proj['BABIP'] = (hitter_proj['H'] - hitter_proj['HR'])/(hitter_proj['AB']-hitter_proj['SO']-hitter_proj['HR'])
 hitter_proj['WAR/600'] = round(hitter_proj['WAR']/hitter_proj['PA']*600,1)
+hitter_proj['K%+'] = round(hitter_proj['K%']/k_median,2)*100
+hitter_proj['K%+'] = 100+(100 - hitter_proj['K%+'])
+hitter_proj['BB%+'] = round(hitter_proj['BB%']/bb_median,2)*100
+hitter_proj['BABIP+'] = round(hitter_proj['BABIP']/babip_median,2)*100
+hitter_proj['ISO+'] = round(hitter_proj['ISO']/iso_median,2)*100
 
-hitter_proj = hitter_proj[['Name','Team','PA','OBP','SLG','wRC+','WAR','WAR/600','K%','BB%','ISO','BABIP']]
 
+
+
+
+hitter_proj = hitter_proj[['Name','Team','PA','OBP','SLG','wRC+','WAR','WAR/600','K%+','BB%+','ISO+','BABIP+']]
+hitter_proj['Name']=hitter_proj['Name'].str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8')
 
 
 
@@ -113,10 +132,22 @@ def create_scatter(answer):
 
   player_chart=all_batters.loc[all_batters['Name']==answer]
 
-  stats = []
+  gran_chart = player_chart[['Name','SwStr%+','Z-Contact%+','O-Contact%+','O-Swing%+','Z-Swing%+','EV+','HH%+','Barrel%+','LD%+','FB%+']]
 
+  projected_chart=hitter_proj[hitter_proj['Name']==answer]
+  #projected_chart = projected_chart.merge(gran_chart,on='Name')
+  p_categories = ['K%+','BB%+','ISO+','BABIP+']
+
+
+  stats = []
+  p_stats = []
   for x in categories:
     stats.append(player_chart[x].item())
+
+  for x in p_categories:
+    p_stats.append(projected_chart[x].item())
+
+
 
   fig = go.Figure()
 
@@ -124,12 +155,22 @@ def create_scatter(answer):
       r=stats,
       theta=categories,
       fill='toself',
-      name=answer))
+      name=answer+" (YTD)"))
+
   fig.add_trace(go.Scatterpolar(
       r=avg_list,
       theta=categories,
       #fill='toself',
       name='MLB Average'))
+
+  fig.add_trace(go.Scatterpolar(
+      r=p_stats,
+      theta=p_categories,
+      fill='toself',
+      name='Steamer Projection'))
+
+      # + YTD Swing/BB Data'))
+
 
   fig.update_layout(title=answer)
 
