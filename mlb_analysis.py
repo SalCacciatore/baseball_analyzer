@@ -123,6 +123,8 @@ hitter_proj['Name']=hitter_proj['Name'].str.normalize('NFKD').str.encode('ascii'
 
 
 
+
+
 def create_scatter(answer):
   categories = all_batters[['BB%+','K%+','SwStr%+','Z-Contact%+','O-Contact%+','O-Swing%+','Z-Swing%+','EV+','HH%+','Barrel%+','LD%+','FB%+','ISO+','BABIP+']].columns
   avg_list = []
@@ -385,6 +387,10 @@ def prompt():
 all_pitchers = pitching_stats(2022,qual=1)
 qual_pitch = pitching_stats(2022)
 
+K_9_median = qual_pitch['K/9'].median()
+
+BB_9_median = qual_pitch['BB/9'].median()
+
 p_chase_median = qual_pitch['O-Swing%'].median()
 
 p_z_contact_median = qual_pitch['Z-Contact%'].median()
@@ -420,6 +426,21 @@ all_pitchers['xFIP+'] = 100 - all_pitchers['xFIP-'] + 100
 all_pitchers['BB%+'] = 100 - all_pitchers['BB%+'] + 100
 all_pitchers['BABIP+'] = 100 - all_pitchers['BABIP+'] + 100
 all_pitchers['HR/FB%+'] = 100 - all_pitchers['HR/FB%+'] + 100
+all_pitchers['WAR/150'] = all_pitchers['WAR']/all_pitchers['IP']*150
+
+
+pitcher_proj = pd.read_csv('Steamer_pitchers.csv')
+
+
+
+pitcher_proj['K/9+'] = round(pitcher_proj['K/9']/K_9_median,2)*100
+pitcher_proj['BB/9+'] = round(pitcher_proj['BB/9']/BB_9_median,2)*100
+pitcher_proj['BB/9+'] = 100+(100 - pitcher_proj['BB/9+'])
+
+pitcher_proj['WAR/150'] = pitcher_proj['WAR']/pitcher_proj['IP']*150
+
+pitcher_proj = pitcher_proj[['Name','Team','G','GS','IP','WAR','WAR/150','ERA','K/9+','BB/9+']]
+
 
 
 
@@ -455,8 +476,14 @@ def squad_pitching(year,team):
 
 def pitcher_query(answer):
   if answer in all_pitchers['Name'].values:
-    displ_df = all_pitchers[all_pitchers['Name']==answer][['Name','Team','G','GS','IP','WAR','ERA+','FIP+','xFIP+','K%+','BB%+','GB%+','BABIP+','HR/FB%+','LOB%+','O-Swing%+','O-Contact%+','Z-Contact%+','Z-Swing%+','SwStr%+','HH%+','EV+','Barrel%+']].set_index('Name')
+    displ_df = all_pitchers[all_pitchers['Name']==answer][['Name','Team','G','GS','IP','WAR','WAR/150','ERA','ERA+','FIP+','xFIP+','K%+','BB%+','GB%+','BABIP+','HR/FB%+','LOB%+','O-Swing%+','O-Contact%+','Z-Contact%+','Z-Swing%+','SwStr%+','HH%+','EV+','Barrel%+']].set_index('Name')
+    streamlit.write("Year-to-date stats")
     streamlit.write(displ_df)
+    displ_proj = pitcher_proj[pitcher_proj['Name']==answer]
+    displ_proj['Name'] = 'Steamer'
+    displ_proj = displ_proj.set_index('Name')
+    streamlit.write('Rest-of-season projections')
+    streamlit.write(displ_proj)
     pitcher_spider(answer)
   else:
     streamlit.write("{} has not piched this season.".format(answer))
@@ -615,7 +642,12 @@ with current_szn:
 
 team_list = all_batters['Team'].unique()
 
-all_pitchers_show = all_pitchers[['Name','Team','G','GS','IP','WAR','ERA+','FIP+','xFIP+','K%+','BB%+','GB%+','BABIP+','HR/FB%+','LOB%+','O-Swing%+','O-Contact%+','Z-Contact%+','Z-Swing%+','SwStr%+','HH%+','EV+','Barrel%+']]
+all_pitchers['WAR/150'] = all_pitchers['WAR']/all_pitchers['IP']*150
+
+
+
+
+all_pitchers_show = all_pitchers[['Name','Team','G','GS','IP','WAR','WAR/150','ERA','ERA+','FIP+','xFIP+','K%+','BB%+','GB%+','BABIP+','HR/FB%+','LOB%+','O-Swing%+','O-Contact%+','Z-Contact%+','Z-Swing%+','SwStr%+','HH%+','EV+','Barrel%+']]
 
 
 
