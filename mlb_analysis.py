@@ -387,9 +387,9 @@ def prompt():
 all_pitchers = pitching_stats(2022,qual=1)
 qual_pitch = pitching_stats(2022)
 
-K_9_median = all_pitchers['SO'].sum()/all_pitchers['TBF'].sum()
+K_9_median = (all_pitchers['SO'].sum()/all_pitchers['IP'].sum())*9
 
-BB_9_median = all_pitchers['BB'].sum()/all_pitchers['TBF'].sum()
+BB_9_median = (all_pitchers['BB'].sum()/all_pitchers['IP'].sum())*9
 
 p_chase_median = qual_pitch['O-Swing%'].median()
 
