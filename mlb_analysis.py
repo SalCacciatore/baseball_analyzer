@@ -12,7 +12,7 @@ from pybaseball import batting_stats,pitching_stats,team_batting,team_pitching
 
 import numpy as np
 
-import plotly.graph_objects as go
+#from plotly import graph_objects as go
 
 from IPython.display import display
 
@@ -560,19 +560,19 @@ with current_szn:
 
 
     if player_prompt == "Past":
-        with streamlit.form("past_selection"):
-            what_past = sel_col.text_input('What batter do you want to learn about?',"Bernie Williams")
-            what_szn = sel_col.text_input("What season?",1998)
+        form = streamlit.form(key = "past_selection")
+        what_past = form.text_input('What batter do you want to learn about?',"Bernie Williams")
+        what_szn = form.text_input("What season?",1998)
             #what_szn = sel_col.slider("What season?",min_value=1871,max_value=2022,value=1998)
-            submitted = streamlit.form_submit_button("Submit")
-            if submitted:
-                if what_szn.isnumeric() == False:
-                    streamlit.write('Please insert an integer next time.')
-                elif int(what_szn) not in range (1871,2023):
-                    streamlit.write('Invalid year. Please select a year between 1871 and 2022.')
-                else:
-                    streamlit.write("Player: " + str(what_past) + ", " + str(what_szn))
-                    player_szn_finder(what_past,what_szn)
+        submitted = form.form_submit_button("Submit")
+        if submitted:
+            if what_szn.isnumeric() == False:
+                streamlit.write('Please insert an integer next time.')
+            elif int(what_szn) not in range (1871,2023):
+                streamlit.write('Invalid year. Please select a year between 1871 and 2022.')
+            else:
+                streamlit.write("Player: " + str(what_past) + ", " + str(what_szn))
+                player_szn_finder(what_past,what_szn)
 
 
     if player_prompt == "Compare":
