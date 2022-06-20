@@ -12,7 +12,7 @@ from pybaseball import batting_stats,pitching_stats,team_batting,team_pitching
 
 import numpy as np
 
-#from plotly import graph_objects as go
+from plotly import graph_objects as go
 
 from IPython.display import display
 
