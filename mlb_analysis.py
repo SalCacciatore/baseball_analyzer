@@ -531,6 +531,15 @@ pitcher_szn = streamlit.container()
 roster_szn = streamlit.container()
 
 
+copy_df = all_batters.reset_index()
+
+Stanton = int(copy_df[copy_df['Name']=='Giancarlo Stanton'].index[0])
+
+copy_pitch = all_pitchers.reset_index()
+
+Nasty = int(copy_pitch[copy_pitch['Name']=='Nestor Cortes'].index[0])
+
+
 with header:
     streamlit.title("BASEBALL STAT ANALYZER")
     streamlit.markdown("Get current and historical baseball data from [FanGraphs](https://www.fangraphs.com).")
@@ -538,11 +547,11 @@ with header:
 with current_szn:
     streamlit.header("Batter Season Analyzer")
     sel_col, disp_col = streamlit.columns(2)
-    player_prompt = sel_col.selectbox("Look at a batter's stats from this season or past seasons, or compare two individual seasons.",options=["Current","Past","Compare"],index=0)
+    player_prompt = sel_col.selectbox("Look at a batter's stats from this season or past seasons, or compare two individual seasons.",options=["Current","Past","Compare"])
 
     if player_prompt == "Current":
         current_form = streamlit.form(key='current_selection')
-        what_player = current_form.text_input('What player do you want to learn about?',"Giancarlo Stanton")
+        what_player = current_form.selectbox('What player do you want to learn about?',options = list(all_batters['Name'].values),index = Stanton)
         p_submitted = current_form.form_submit_button("Submit")
         if p_submitted:
             baseball_query(what_player)
@@ -597,7 +606,7 @@ with current_szn:
                 streamlit.write('Feature coming soon.')
     if pitcher_prompt == "Current":
         pitch_form = streamlit.form(key = "pitcher_selection")
-        what_pitcher = pitch_form.text_input('What pitcher do you want to learn about?',"Nestor Cortes")
+        what_pitcher = pitch_form.selectbox('What pitcher do you want to learn about?',options = list(all_pitchers['Name'].values),index = Nasty)
         pi_submitted = pitch_form.form_submit_button("Submit")
         if pi_submitted:
             pitcher_query(what_pitcher)
