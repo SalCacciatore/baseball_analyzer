@@ -541,20 +541,16 @@ with current_szn:
     player_prompt = sel_col.selectbox("Look at a batter's stats from this season or past seasons, or compare two individual seasons.",options=["Current","Past","Compare"],index=0)
 
     if player_prompt == "Current":
-        with streamlit.form("current_selection"):
-            what_player = sel_col.text_input('What player do you want to learn about?',"Giancarlo Stanton")
-            p_submitted = streamlit.form_submit_button("Submit")
-            if p_submitted:
-                baseball_query(what_player)
+        current_form = streamlit.form(key='current_selection')
+        what_player = current_form.text_input('What player do you want to learn about?',"Giancarlo Stanton")
+        p_submitted = current_form.form_submit_button("Submit")
+        if p_submitted:
+            baseball_query(what_player)
         with streamlit.form("random"):
             r_submit = streamlit.form_submit_button("Random Player")
             if r_submit:
                 random_player = random.choices(all_batters['Name'], k=1)[0]
                 baseball_query(random_player)
-
-
-
-
 
 
 
@@ -576,23 +572,20 @@ with current_szn:
 
 
     if player_prompt == "Compare":
-        with streamlit.form('comparison'):
-
-            player1 = sel_col.text_input('Who is the first player you want to learn about?',"Mike Trout")
-            szn1 = sel_col.text_input("What season?",2013)
-
-            player2 = sel_col.text_input('Who is the second player you want to learn about?',"Aaron Judge")
-            szn2 = sel_col.text_input("What season?",2017)
-
-            submitted = streamlit.form_submit_button("Submit")
-            if submitted:
-                if szn1.isnumeric() == False or szn2.isnumeric() == False:
-                    streamlit.write('Please insert an integer next time.')
-                elif int(szn1) not in range (1871,2023) or int(szn2) not in range (1871,2023):
-                    streamlit.write('Invalid year. Please select a year between 1871 and 2022.')
-                else:
-                    streamlit.write("Player 1: " + player1 + " ("+str(szn1)+")"+" | Player 2:",player2 +" ("+str(szn2)+")")
-                    compare_seasons(player1,player2,szn1,szn2)
+        c_form = streamlit.form(key = 'comparison')
+        player1 = c_form.text_input('Who is the first player you want to learn about?',"Mike Trout")
+        szn1 = c_form.text_input("What season?",2013)
+        player2 = c_form.text_input('Who is the second player you want to learn about?',"Aaron Judge")
+        szn2 = c_form.text_input("What season?",2017)
+        c_submitted = c_form.form_submit_button("Submit")
+        if c_submitted:
+            if szn1.isnumeric() == False or szn2.isnumeric() == False:
+                streamlit.write('Please insert an integer next time.')
+            elif int(szn1) not in range (1871,2023) or int(szn2) not in range (1871,2023):
+                streamlit.write('Invalid year. Please select a year between 1871 and 2022.')
+            else:
+                streamlit.write("Player 1: " + player1 + " ("+str(szn1)+")"+" | Player 2:",player2 +" ("+str(szn2)+")")
+                compare_seasons(player1,player2,szn1,szn2)
 
 with current_szn:
     streamlit.header("Pitcher Season Analyzer")
@@ -603,11 +596,11 @@ with current_szn:
     if pitcher_prompt == "Past":
                 streamlit.write('Feature coming soon.')
     if pitcher_prompt == "Current":
-        with streamlit.form("pitcher_selection"):
-            what_pitcher = sel_col.text_input('What pitcher do you want to learn about?',"Nestor Cortes")
-            pi_submitted = streamlit.form_submit_button("Submit")
-            if pi_submitted:
-                pitcher_query(what_pitcher)
+        pitch_form = streamlit.form(key = "pitcher_selection")
+        what_pitcher = pitch_form.text_input('What pitcher do you want to learn about?',"Nestor Cortes")
+        pi_submitted = pitch_form.form_submit_button("Submit")
+        if pi_submitted:
+            pitcher_query(what_pitcher)
         with streamlit.form("random_pitcher"):
             rp_submit = streamlit.form_submit_button("Random Pitcher")
             if rp_submit:
@@ -626,18 +619,21 @@ with current_szn:
     streamlit.text("Coming soon")
 
     streamlit.header("fWAR Leaderboards")
-    what_year = streamlit.slider("What season?",min_value=1871,max_value=2022,value=1961)
-    hit_or_throw = streamlit.selectbox("Do you want the hitting leaders or pitching leaders?",options=["Hitters","Pitchers"],index=0)
-    if hit_or_throw == 'Hitters':
-        yr = batting_stats(what_year)
-        disp_df = yr[['Name','Team','PA','wRC+','OBP','SLG','HR','ISO','WAR']].head(10)
-        streamlit.write("Hitters,",str(what_year))
-        streamlit.write(disp_df)
-    if hit_or_throw == 'Pitchers':
-        yr = pitching_stats(what_year)
-        disp_df = yr[['Name','Team','ERA','FIP','xFIP','ERA-','FIP-','xFIP-','K%','BB%','WAR']].head(10)
-        streamlit.write("Pitchers,",str(what_year))
-        streamlit.write(disp_df)
+    war_form = streamlit.form(key = 'fWAR')
+    what_year = war_form.slider("What season?",min_value=1871,max_value=2022,value=2022)
+    hit_or_throw = war_form.selectbox("Do you want the hitting leaders or pitching leaders?",options=["Hitters","Pitchers"],index=0)
+    war_submitted = war_form.form_submit_button("Submit")
+    if war_submitted:
+        if hit_or_throw == 'Hitters':
+            yr = batting_stats(what_year)
+            disp_df = yr[['Name','Team','PA','wRC+','OBP','SLG','HR','ISO','WAR']].head(10)
+            streamlit.write("Hitters,",str(what_year))
+            streamlit.write(disp_df)
+        if hit_or_throw == 'Pitchers':
+            yr = pitching_stats(what_year)
+            disp_df = yr[['Name','Team','ERA','FIP','xFIP','ERA-','FIP-','xFIP-','K%','BB%','WAR']].head(10)
+            streamlit.write("Pitchers,",str(what_year))
+            streamlit.write(disp_df)
 
 
 team_list = all_batters['Team'].unique()
