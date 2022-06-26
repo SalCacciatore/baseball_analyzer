@@ -440,6 +440,7 @@ pitcher_proj['BB/9+'] = 100+(100 - pitcher_proj['BB/9+'])
 pitcher_proj['WAR/150'] = pitcher_proj['WAR']/pitcher_proj['IP']*150
 
 pitcher_proj = pitcher_proj[['Name','Team','G','GS','IP','WAR','WAR/150','ERA','K/9+','BB/9+']]
+pitcher_proj['Name']=pitcher_proj['Name'].str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8')
 
 
 
