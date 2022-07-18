@@ -659,7 +659,7 @@ all_pitchers_show = all_pitchers[['Name','Team','G','GS','IP','WAR','WAR/150','E
 
 
 with roster_szn:
-    streamlit.header("Roster Analyzer")
+    streamlit.header("Team Analyzer")
     with streamlit.form("roster_picker"):
         what_roster = streamlit.selectbox("What roster do you want to look at?",options=team_list,index=0)
         team_submit = streamlit.form_submit_button("Submit")
